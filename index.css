@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --color-eakar-primary: #d32f2f;
+  --color-eakar-secondary: #f44336;
+  --color-eakar-accent: #ff9800;
+  --color-eakar-bg: #f0f2f5;
+  --color-eakar-sidebar: #b71c1c;
+}
+
+@layer base {
+  body {
+    @apply bg-eakar-bg text-slate-800;
+  }
+}

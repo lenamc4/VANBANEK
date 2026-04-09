@@ -1,19 +1,32 @@
 
+/// <reference types="vite/client" />
 import { GoogleGenAI, Type } from "@google/genai";
 import { SYSTEM_INSTRUCTION, DEPARTMENTS } from '../constants';
 import { GeminiAnalysisResult, AnalysisFile } from '../types';
 
 const getGeminiClient = () => {
   // Ưu tiên lấy từ biến môi trường (được cấu hình lúc build trên Netlify/Vercel)
-  // Sau đó mới lấy từ window (do người dùng nhập trong Settings và lưu vào localStorage)
-  const apiKey = 
-    (typeof process !== 'undefined' ? (process.env.GEMINI_API_KEY || process.env.API_KEY) : null) || 
-    (window as any).GEMINI_API_KEY;
+  // Thử tất cả các biến có thể có
+  let apiKey = 
+    import.meta.env.VITE_GEMINI_API_KEY || 
+    process.env.GEMINI_API_KEY || 
+    process.env.API_KEY || 
+    (window as any).GEMINI_API_KEY ||
+    "AIzaSyAI9yEv8MloA89j1JI0SCe_XLlN0RI7sXg"; // API Key mặc định của bạn
+
+  // Xử lý trường hợp apiKey là chuỗi "undefined" hoặc "null" do lỗi build
+  if (apiKey === "undefined" || apiKey === "null") {
+    apiKey = "AIzaSyAI9yEv8MloA89j1JI0SCe_XLlN0RI7sXg";
+  }
 
   if (!apiKey) {
     throw new Error("API Key chưa được cấu hình. Vui lòng vào phần Cài đặt hoặc cấu hình biến môi trường GEMINI_API_KEY.");
   }
-  return new GoogleGenAI({ apiKey });
+
+  // Loại bỏ khoảng trắng dư thừa (nguyên nhân phổ biến gây lỗi 400)
+  const cleanKey = apiKey.trim();
+  
+  return new GoogleGenAI({ apiKey: cleanKey });
 };
 
 export const analyzeDocument = async (
